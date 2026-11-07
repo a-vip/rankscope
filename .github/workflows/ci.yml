@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    - cron: '0 5 * * 1' # weekly live check that upstream sources still parse
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+      - name: JS syntax check
+        run: for f in public/assets/*.js server/*.js scripts/*.js; do node --check "$f"; done
+
+  php:
+    name: PHP lint (7.4 - 8.3)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.4', '8.1', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, mbstring
+      - run: php -l public/api/index.php && php -l public/api/config.sample.php
+      - name: PHP endpoint contract
+        run: |
+          cd public && php -S 127.0.0.1:8080 >/dev/null 2>&1 &
+          sleep 1
+          curl -sf "http://127.0.0.1:8080/api/index.php?s=config" | grep -q '"backend":"php"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:8080/api/index.php?s=nope')" = "400"
+          test "$(curl -s -o /dev/null -w '%{http_code}' 'http://127.0.0.1:8080/api/index.php?s=serp&q=x')" = "501"
+          curl -sf "http://127.0.0.1:8080/api/index.php?s=g&q=coffee" | grep -q '"ok":true'
+
+  smoke:
+    name: Live upstream smoke test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run smoke
+

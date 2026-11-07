@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RankScope - Live Keyword Intelligence</title>
+  <meta name="description" content="Live keyword research: real-time trends, long-tail discovery, measured keyword difficulty, personal rankability and evidence-backed content briefs." />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://suggestqueries.google.com https://duckduckgo.com; connect-src 'self' https:; frame-src https://trends.google.com; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; base-uri 'self'; form-action 'self'" />
+  <meta name="theme-color" content="#0b0f17" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="assets/icon.svg" alt="" width="30" height="30" />
+      <div>
+        <div class="brand-name">RankScope</div>
+        <div class="brand-sub">Live keyword intelligence</div>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="discover" role="tab">Discover</button>
+      <button class="tab" data-tab="live" role="tab">Live Trends</button>
+      <button class="tab" data-tab="plan" role="tab">Content Plan</button>
+      <button class="tab" data-tab="watch" role="tab">Watchlist <span class="pill" id="watchCount">0</span></button>
+      <button class="tab" data-tab="settings" role="tab">Settings</button>
+      <button class="tab" data-tab="method" role="tab">Methodology</button>
+    </nav>
+    <div class="top-right">
+      <select id="market" title="Market (country / language)" aria-label="Market"></select>
+      <button id="liveToggle" class="live-btn" title="Live mode: auto-refresh trends and watchlist">
+        <span class="dot"></span><span id="liveText">LIVE OFF</span>
+      </button>
+      <span id="modeBadge" class="mode-badge" title="Data connection">...</span>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" hidden></div>
+
+  <main>
+    <!-- ============================ DISCOVER ============================ -->
+    <section id="tab-discover" class="panel active">
+      <form id="searchForm" class="search">
+        <input id="seed" type="search" autocomplete="off" placeholder="Enter a topic, niche or keyword - e.g. cold brew coffee, ai regulation, budget travel vietnam" aria-label="Topic or keyword" required />
+        <select id="depth" aria-label="Research depth" title="Depth">
+          <option value="quick">Quick (~20 queries)</option>
+          <option value="standard" selected>Standard (~70 queries)</option>
+          <option value="deep">Deep (~140 queries)</option>
+        </select>
+        <button type="submit" class="primary" id="goBtn">Analyze</button>
+      </form>
+      <div id="history" class="chips"></div>
+
+      <div id="progress" class="progress" hidden>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+        <div id="progressText" class="muted"></div>
+      </div>
+
+      <div id="empty" class="empty-state">
+        <h2>Find keywords you can actually rank for.</h2>
+        <p>RankScope queries Google, Bing, DuckDuckGo, YouTube and Amazon autocomplete, live Google Trends, Google News, Wikipedia pageviews, GDELT global news, Hacker News and Reddit, then scores every keyword for demand, difficulty, trend and <b>your</b> chance of ranking - with the evidence linked.</p>
+        <div class="chips center" id="examples"></div>
+      </div>
+
+      <div id="results" hidden>
+        <div class="section-head">
+          <h2 id="seedTitle"></h2>
+          <div class="actions">
+            <button id="watchSeed" class="ghost">+ Watch</button>
+            <button id="exportCsv" class="ghost">Export CSV</button>
+            <button id="exportJson" class="ghost">Export JSON</button>
+            <button id="shareLink" class="ghost">Copy link</button>
+          </div>
+        </div>
+
+        <div class="cards" id="seedCards"></div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>Real-world interest</h3><span class="muted small" id="wikiLabel"></span></div>
+            <div id="chartWiki" class="chart"></div>
+            <div class="muted small" id="wikiNote"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>News momentum</h3><span class="muted small">Google News + GDELT global coverage</span></div>
+            <div id="chartNews" class="chart"></div>
+            <div class="muted small" id="newsNote"></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>Google search interest (official embed)</h3><a id="trendsLink" target="_blank" rel="noopener" class="small">Open in Google Trends &#8599;</a></div>
+            <div id="trendsEmbed" class="trends-embed"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>What people are saying right now</h3></div>
+            <div id="seedBuzz" class="buzz"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Write these first</h3><span class="muted small">Best mix of demand, low difficulty, momentum and your rankability</span></div>
+          <div id="picks" class="picks"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h3>All keywords <span class="pill" id="kwCount">0</span></h3>
+            <span class="muted small">Click any keyword for the full evidence, SERP analysis and article brief</span>
+          </div>
+          <div class="filters">
+            <input id="filterText" type="search" placeholder="Filter keywords..." aria-label="Filter keywords" />
+            <div class="chips" id="filterChips"></div>
+            <label class="slider">Max KD <input id="filterKd" type="range" min="0" max="100" value="100" /><b id="filterKdV">100</b></label>
+            <label class="slider">Min demand <input id="filterDemand" type="range" min="0" max="100" value="0" /><b id="filterDemandV">0</b></label>
+            <select id="filterRank" aria-label="Minimum rankability">
+              <option value="0">Any rankability</option>
+              <option value="3">Possible or better</option>
+              <option value="4">Likely or better</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table class="kw-table" id="kwTable">
+              <thead>
+                <tr>
+                  <th data-sort="keyword">Keyword</th>
+                  <th data-sort="tail">Type</th>
+                  <th data-sort="intent">Intent</th>
+                  <th data-sort="demand" title="Relative demand index (or real volume when DataForSEO is connected)">Demand</th>
+                  <th data-sort="kd" title="Keyword difficulty 0-100">KD</th>
+                  <th data-sort="rank" title="Your chance of reaching page 1">Rankability</th>
+                  <th data-sort="trend">Trend</th>
+                  <th data-sort="opportunity" class="sorted desc" title="Overall opportunity score">Opportunity</th>
+                  <th>Sources</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ LIVE ============================ -->
+    <section id="tab-live" class="panel">
+      <div class="section-head">
+        <h2>Live trends <span class="muted small" id="liveUpdated"></span></h2>
+        <div class="actions">
+          <label class="small">Refresh every
+            <select id="liveInterval"><option value="2">2 min</option><option value="5" selected>5 min</option><option value="15">15 min</option><option value="30">30 min</option></select>
+          </label>
+          <button id="liveRefresh" class="ghost">Refresh now</button>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="card-head"><h3>Google Trending Now</h3><span class="muted small" id="trendGeo"></span></div><div id="liveTrends" class="live-list"></div></div>
+        <div class="card"><div class="card-head"><h3>Wikipedia most viewed</h3><span class="muted small" id="wikiTopDate"></span></div><div id="liveWiki" class="live-list"></div></div>
+        <div class="card"><div class="card-head"><h3>Hacker News front page</h3><span class="muted small">tech &amp; startup buzz</span></div><div id="liveHN" class="live-list"></div></div>
+      </div>
+    </section>
+
+    <!-- ============================ PLAN ============================ -->
+    <section id="tab-plan" class="panel">
+      <div class="section-head">
+        <h2>Content plan <span class="muted small" id="planSeed"></span></h2>
+        <div class="actions"><button id="exportPlan" class="ghost">Download plan (.md)</button></div>
+      </div>
+      <p class="muted">Keywords grouped into topic clusters. Write the pillar page, then the supporting articles, and link every supporting article back to the pillar. Topical depth is one of the strongest ranking signals for smaller sites.</p>
+      <div id="plan"></div>
+    </section>
+
+    <!-- ============================ WATCH ============================ -->
+    <section id="tab-watch" class="panel">
+      <div class="section-head">
+        <h2>Watchlist <span class="muted small" id="watchUpdated"></span></h2>
+        <div class="actions"><button id="watchRefresh" class="ghost">Re-check all</button></div>
+      </div>
+      <p class="muted">Saved keywords are re-checked on demand, and automatically while Live mode is on. Each check stores a snapshot so you can see movement over time (stored privately in this browser).</p>
+      <div class="table-wrap"><table class="kw-table" id="watchTable">
+        <thead><tr><th>Keyword</th><th>Market</th><th>Autocomplete</th><th>News 7d</th><th>Wiki/day</th><th>Trend</th><th>History</th><th>Checked</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </section>
+
+    <!-- ============================ SETTINGS ============================ -->
+    <section id="tab-settings" class="panel">
+      <h2>Settings</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Your website</h3>
+          <p class="muted small">Rankability compares each keyword's difficulty with your site's authority. Without it, RankScope assumes a new/small site (15).</p>
+          <label class="field">Your domain <input id="setDomain" placeholder="aviperera.com" /></label>
+          <label class="field">Your site authority (0-100)
+            <input id="setAuth" type="number" min="0" max="100" placeholder="e.g. 22 - use Ahrefs DR, Moz DA or Open PageRank x10" />
+          </label>
+          <button id="detectAuth" class="ghost">Detect with Open PageRank</button>
+          <span id="detectAuthMsg" class="muted small"></span>
+        </div>
+        <div class="card">
+          <h3>Research</h3>
+          <label class="field">Autocomplete engines</label>
+          <div class="chips" id="setEngines"></div>
+          <label class="field">Deep-analyse the top N keywords (news velocity, SERP)
+            <input id="setTopN" type="number" min="5" max="60" value="15" />
+          </label>
+          <label class="field">Default market <select id="setMarket"></select></label>
+        </div>
+        <div class="card">
+          <h3>Backend connection</h3>
+          <label class="field">API URL <input id="setApi" placeholder="api/" /></label>
+          <label class="field">Access token (only if your server sets ACCESS_TOKEN) <input id="setToken" type="password" autocomplete="off" /></label>
+          <button id="saveConn" class="primary">Save &amp; reconnect</button>
+          <div id="connInfo" class="muted small"></div>
+        </div>
+        <div class="card">
+          <h3>Data sources status</h3>
+          <div id="sourceStatus"></div>
+          <button id="clearData" class="ghost danger">Clear cached results &amp; history</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ METHOD ============================ -->
+    <section id="tab-method" class="panel prose">
+      <h2>How RankScope scores keywords</h2>
+      <p>Every number is explainable: open any keyword to see the exact inputs, their contribution and links to the raw evidence.</p>
+      <h3>Demand</h3>
+      <p>With <b>DataForSEO</b> connected, demand is real Google Ads monthly volume (log-scaled to 0-100: 100 searches = 40, 1,000 = 60, 10,000 = 80, 100,000 = 100). Without it, RankScope uses a <b>relative demand index</b> from autocomplete evidence: how many engines suggest the phrase, its rank in the suggestions, how many different prefixes trigger it, and Google's own suggestion relevance score. Autocomplete only suggests queries people type often, so this is a strong popularity signal, but it is relative and not a volume figure. Wikipedia pageviews provide real absolute interest figures at topic level.</p>
+      <h3>Keyword difficulty (KD)</h3>
+      <ul>
+        <li><b>Measured (best):</b> with a Serper.dev key, the live Google top 10 is analysed: position-weighted domain authority (Open PageRank if connected), how many results target the exact phrase in the title, SERP features that push organic results down, and how many slots are held by forums/UGC.</li>
+        <li><b>DataForSEO Labs KD</b> is shown alongside when connected.</li>
+        <li><b>Estimated (fallback):</b> word count, demand, intent, question/fresh/local modifiers and whether a dedicated Wikipedia article exists. Always labelled <i>Low confidence</i>.</li>
+      </ul>
+      <h3>Rankability (your chance of page 1)</h3>
+      <p>KD compared with <b>your</b> site authority, adjusted for weak spots: low-authority pages already on page 1, forum/UGC results, outdated results and rising interest. Scale: <i>Very likely, Likely, Possible, Unlikely, Very unlikely, Near-impossible (today)</i>. "Today" matters: authority grows as you publish and earn links.</p>
+      <h3>Trend</h3>
+      <p>Combines Google Trends "Trending now", Wikipedia pageview change (last 14 days vs prior 60), Google News velocity (last 7 days vs the prior 3-week baseline), GDELT global news volume and, with DataForSEO, 12 months of search volume. Labels: Breakout, Rising, Stable, Declining. Seasonality is detected from 3 years of monthly Wikipedia views.</p>
+      <h3>Opportunity</h3>
+      <p>38% demand + 42% ease (100 - KD) + 20% trend, blended 55/45 with rankability, plus a small bonus for long question queries and a penalty for navigational (someone else's brand) queries.</p>
+      <h3>Honest limits</h3>
+      <ul>
+        <li>No tool can guarantee rankings. Google's algorithm uses hundreds of signals RankScope cannot see (your content quality, links, user engagement). Use the scores to choose battles you can win, then out-write the competition.</li>
+        <li>Absolute search volumes only come from Google Ads data (DataForSEO here). Tools that show volumes without such data are estimating.</li>
+        <li>Free sources are unofficial endpoints and may rate-limit or change. Source status is shown in Settings, and each source fails gracefully.</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- ============================ DETAIL DRAWER ============================ -->
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-inner">
+      <div class="drawer-head">
+        <div>
+          <div class="muted small" id="dMeta"></div>
+          <h2 id="dTitle"></h2>
+        </div>
+        <button id="dClose" class="icon" aria-label="Close">&times;</button>
+      </div>
+      <div class="drawer-actions">
+        <button id="dWatch" class="ghost">+ Watch</button>
+        <button id="dSeed" class="ghost">Use as new seed</button>
+        <button id="dCopyBrief" class="ghost">Copy brief (Markdown)</button>
+        <button id="dDownloadBrief" class="ghost">Download brief</button>
+        <a id="dGoogle" class="ghost btn" target="_blank" rel="noopener">Google SERP &#8599;</a>
+      </div>
+      <div id="dBody"></div>
+    </div>
+  </aside>
+  <div id="scrim" class="scrim" hidden></div>
+  <div id="toast" class="toast" hidden></div>
+
+  <footer class="foot muted small">
+    RankScope &middot; open source &middot; data from public sources linked in every result &middot; scores are decision aids, not guarantees
+  </footer>
+
+  <script src="assets/engine.js"></script>
+  <script src="assets/charts.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
+

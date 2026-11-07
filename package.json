@@ -1,0 +1,15 @@
+{
+  "name": "rankscope",
+  "version": "1.0.0",
+  "description": "Live keyword intelligence: real-time trends, long-tail discovery, measured keyword difficulty, personal rankability and evidence-backed content briefs.",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js",
+    "test": "node --test tests/engine.test.js tests/proxy.test.js",
+    "smoke": "node scripts/smoke.js",
+    "bundle": "node scripts/bundle.js"
+  }
+}

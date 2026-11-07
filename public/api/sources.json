@@ -1,0 +1,129 @@
+{
+  "_comment": "Whitelisted upstream data sources. Shared by api/index.php (PHP) and server/server.js (Node). Placeholders are URL-encoded server-side. 'direct' = how the browser may call it without a backend (jsonp | cors | null).",
+  "g": {
+    "label": "Google Autocomplete",
+    "url": "https://suggestqueries.google.com/complete/search?client=chrome&ie=UTF-8&oe=UTF-8&hl={hl}&gl={gl}&q={q}",
+    "direct": "jsonp",
+    "directUrl": "https://suggestqueries.google.com/complete/search?client=chrome&hl={hl}&gl={gl}&q={q}&callback={cb}",
+    "ttl": 21600,
+    "params": ["q", "hl", "gl"]
+  },
+  "yt": {
+    "label": "YouTube Autocomplete",
+    "url": "https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&ie=UTF-8&oe=UTF-8&hl={hl}&gl={gl}&q={q}",
+    "direct": "jsonp",
+    "directUrl": "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&hl={hl}&gl={gl}&q={q}&callback={cb}",
+    "ttl": 21600,
+    "params": ["q", "hl", "gl"]
+  },
+  "bing": {
+    "label": "Bing Autosuggest",
+    "url": "https://api.bing.com/osjson.aspx?query={q}&market={hl}-{GL}",
+    "direct": null,
+    "ttl": 21600,
+    "params": ["q", "hl", "gl"]
+  },
+  "ddg": {
+    "label": "DuckDuckGo Autocomplete",
+    "url": "https://duckduckgo.com/ac/?q={q}&kl={gl}-{hl}",
+    "direct": "jsonp",
+    "directUrl": "https://duckduckgo.com/ac/?q={q}&kl={gl}-{hl}&callback={cb}",
+    "ttl": 21600,
+    "params": ["q", "hl", "gl"]
+  },
+  "amz": {
+    "label": "Amazon Autocomplete",
+    "url": "https://completion.amazon.com/api/2017/suggestions?mid=ATVPDKIKX0DER&alias=aps&prefix={q}",
+    "direct": null,
+    "ttl": 21600,
+    "params": ["q"]
+  },
+  "trends": {
+    "label": "Google Trends - Trending Now",
+    "url": "https://trends.google.com/trending/rss?geo={GL}",
+    "direct": null,
+    "ttl": 600,
+    "params": ["gl"]
+  },
+  "news": {
+    "label": "Google News (30 days)",
+    "url": "https://news.google.com/rss/search?q={q}%20when%3A30d&hl={hl}-{GL}&gl={GL}&ceid={GL}%3A{hl}",
+    "direct": null,
+    "ttl": 1800,
+    "params": ["q", "hl", "gl"]
+  },
+  "gdelt": {
+    "label": "GDELT Global News Volume",
+    "url": "https://api.gdeltproject.org/api/v2/doc/doc?query={q}&mode=timelinevolraw&format=json&timespan=3months",
+    "direct": "cors",
+    "ttl": 3600,
+    "params": ["q"]
+  },
+  "wsearch": {
+    "label": "Wikipedia Search",
+    "url": "https://{hl}.wikipedia.org/w/api.php?action=query&list=search&srsearch={q}&srlimit=5&srprop=size%7Cwordcount%7Ctimestamp&format=json&origin=*",
+    "direct": "cors",
+    "ttl": 86400,
+    "params": ["q", "hl"]
+  },
+  "wviews": {
+    "label": "Wikipedia Pageviews",
+    "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/{hl}.wikipedia.org/all-access/user/{article}/{gran}/{start}/{end}",
+    "direct": "cors",
+    "ttl": 21600,
+    "params": ["article", "hl", "gran", "start", "end"]
+  },
+  "wtop": {
+    "label": "Wikipedia Most Viewed",
+    "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/top/{hl}.wikipedia.org/all-access/{y}/{m}/{d}",
+    "direct": "cors",
+    "ttl": 3600,
+    "params": ["hl", "y", "m", "d"]
+  },
+  "hn": {
+    "label": "Hacker News",
+    "url": "https://hn.algolia.com/api/v1/search?query={q}&tags=story&hitsPerPage=30&numericFilters=created_at_i%3E{since}",
+    "direct": "cors",
+    "ttl": 1800,
+    "params": ["q", "since"]
+  },
+  "hnfront": {
+    "label": "Hacker News Front Page",
+    "url": "https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=30",
+    "direct": "cors",
+    "ttl": 600,
+    "params": []
+  },
+  "reddit": {
+    "label": "Reddit",
+    "url": "https://old.reddit.com/search.json?q={q}&sort=relevance&t=year&limit=25&raw_json=1",
+    "direct": null,
+    "ttl": 3600,
+    "params": ["q"]
+  },
+  "serp": {
+    "label": "Google SERP (Serper.dev)",
+    "keyed": "SERPER_API_KEY",
+    "ttl": 604800,
+    "params": ["q", "hl", "gl"]
+  },
+  "opr": {
+    "label": "Domain Authority (Open PageRank)",
+    "keyed": "OPR_API_KEY",
+    "ttl": 2592000,
+    "params": ["domains"]
+  },
+  "dfsvol": {
+    "label": "Search Volume & CPC (DataForSEO)",
+    "keyed": "DATAFORSEO_LOGIN",
+    "ttl": 2592000,
+    "params": ["kw", "hl", "gl"]
+  },
+  "dfskd": {
+    "label": "Keyword Difficulty (DataForSEO Labs)",
+    "keyed": "DATAFORSEO_LOGIN",
+    "ttl": 2592000,
+    "params": ["kw", "hl", "gl"]
+  }
+}
+
