@@ -2,6 +2,8 @@
 
 **Find keywords you can actually rank for, with the evidence to back it up.**
 
+[![CI](https://github.com/a-vip/rankscope/actions/workflows/ci.yml/badge.svg)](https://github.com/a-vip/rankscope/actions/workflows/ci.yml) · **[Live demo (browser-only mode)](https://a-vip.github.io/rankscope/)**. For the full data set, deploy the free PHP/Node backend; see [Deploy](#deploy).
+
 RankScope is a self-hosted keyword research tool for writers, bloggers and SEOs. Give it a topic and it:
 
 - **Discovers hundreds of real keywords** (long-tail, questions, comparisons, how-tos, buyer keywords) by querying Google, Bing, DuckDuckGo, YouTube and Amazon autocomplete with 70-140 prefix/suffix variations.

@@ -1,0 +1,38 @@
+name: Deploy demo to GitHub Pages
+
+# Publishes public/ as a browser-only demo (no PHP on Pages).
+# The app detects the missing backend and uses browser-capable sources only.
+on:
+  push:
+    branches: [main]
+    paths: ['public/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Prepare static site (drop server-only files)
+        run: |
+          mkdir -p _site
+          cp -r public/. _site/
+          rm -f _site/api/index.php _site/api/config.sample.php _site/api/.htaccess
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
